@@ -30,7 +30,11 @@ class King(Piece):
             raise ValueError(
                 "Color must be either white or black"
             )
-    pass
+    def can_move(self,finito:tuple[int,int])->bool:
+        difference = [a - b for a, b in zip(self.position, finito)]
+        return (abs(difference[0]) == 1 and abs(difference[1]) == 0) or (abs(difference[0]) == 0 and abs(difference[1]) == 1) or (abs(difference[0]) == 1 and abs(difference[1]) ==1)
+
+
 class Queen(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
         super().__init__(position,color)
@@ -38,7 +42,13 @@ class Queen(Piece):
             raise ValueError(
                 "Color must be either white or black"
             )
-    pass
+    def can_move(self,finito:tuple[int,int])->bool:
+        difference = [a - b for a, b in zip(self.position, finito)]
+
+        return ((difference[0] == 0 and difference[1] != 0) or (difference[1] == 0 and difference[0] != 0)) or (abs(difference[0]) == abs(difference[1]))
+
+
+
 class Rook(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
         super().__init__(position,color)
@@ -46,7 +56,9 @@ class Rook(Piece):
             raise ValueError(
                 "Color must be either white or black"
             )
-    pass
+    def can_move(self,finito:tuple[int,int])->bool:
+        difference = [a - b for a, b in zip(self.position, finito)]
+        return (difference[0] == 0 and  difference[1]!=0) or (difference[1] == 0 and difference[0]!=0)
 
 
 class Bishop(Piece):
@@ -60,6 +72,8 @@ class Bishop(Piece):
 
     def can_move(self,finito:tuple[int,int])->bool:
         difference = [a - b for a, b in zip(self.position, finito)]
+        if difference[0] == 0 and difference[1] == 0:
+            return
         return abs(difference[0]) == abs(difference[1])
         # if the difference (movement vector) in the x and y is in the form of 1,1 2,2 3,3 -3,3 then the bishop can move
 
@@ -72,6 +86,10 @@ class Knight(Piece):
             raise ValueError(
                 "Color must be either white or black"
             )
+
+    def can_move(self,finito:tuple[int,int])->bool:
+        difference = [a - b for a, b in zip(self.position, finito)]
+        return (abs(difference[0])==1 and abs(difference[1])==2) or (abs(difference[0])==2 and abs(difference[1])==1)
 
 
 class Pawn(Piece):
