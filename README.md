@@ -1,0 +1,1 @@
+This is a repo for terminal chess with three parts - the client where you can play the game, the game server that will host games for two online users and the main score server which will store authentication and all of the leaderboards
