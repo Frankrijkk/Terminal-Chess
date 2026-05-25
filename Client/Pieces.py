@@ -84,7 +84,7 @@ class Pawn(Piece):
             )
 
     def can_move(self,finito:tuple[int,int])->bool:
-        difference = [a - b for a, b in zip(self.position, finito)]
+        difference = [b - a for a, b in zip(self.position, finito)]
         if difference[1] != 0:
             return False
         if self.color == "white":

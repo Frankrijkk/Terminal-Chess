@@ -1,12 +1,13 @@
 import pytest
-from Pieces import Pawn
+from Pieces import Pawn, Bishop
 
 
 def test_pawn_move():
+
     p = Pawn((1,1),"white")
     assert p.can_move((2,1)) #normal 1 up
     assert p.can_move((3,1)) # normal 2 up
-    assert not p.can_move((1,1)) # no same position'
+    assert not p.can_move((1,1)) # no same position
     assert not p.can_move((4,1)) # no 3 up
     assert not p.can_move((1,2)) # no sideways
     assert not p.can_move((1,0)) # no down
@@ -27,3 +28,21 @@ def test_pawn_move():
     pb2 = Pawn((5,2),"black")
     assert pb2.can_move((4,2))
     assert not pb2.can_move((3,2))
+
+
+def test_bishop_move():
+    b = Bishop((1,1),"white")
+    assert b.can_move((2,2)) # diagonal
+    assert not b.can_move((1,2)) # no sideways
+    assert not b.can_move((2,1)) # no up
+    assert b.can_move((3,3))
+    assert not b.can_move((3,2))
+
+def test_knight_move():
+    pass
+def test_queen_move():
+    pass
+def test_king_move():
+    pass
+def test_rook_move():
+    pass
