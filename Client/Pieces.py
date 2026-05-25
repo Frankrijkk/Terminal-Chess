@@ -1,3 +1,4 @@
+import math
 
 
 class Piece:
@@ -13,15 +14,28 @@ class Piece:
 
     def can_move(self,finito:tuple[int,int])->bool:
         print("Can't move a nothing")
-        raise ValueError("Can't move a nothing")
+        return False
+
 
     def can_attack(self,finito:tuple[int,int])->bool:
-        print(f"Can't atttack with a nothing")
-        raise  ValueError("can' attack with a nothing")
+        return self.can_move(finito)
+
 
     def move(self,finito:tuple[int,int]):
             self.position = list(finito)
 
+    def on_the_way(self,finito:tuple[int,int])->list[tuple[int,int]]:
+        difference = [b - a for a, b in zip(self.position, finito)]
+        result = []
+        N = math.gcd(abs(difference[0]),abs(difference[1]))
+        dy = difference[0]//N
+        dx = difference[1]//N
+        for i in range(1,N+1):
+            result.append((self.position[0]+i*dy,self.position[1]+i*dx))
+        return result
+
+    def is_piece(self)->bool:
+        return False
 
 class King(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
@@ -31,8 +45,11 @@ class King(Piece):
                 "Color must be either white or black"
             )
     def can_move(self,finito:tuple[int,int])->bool:
-        difference = [a - b for a, b in zip(self.position, finito)]
+        difference = [b - a for a, b in zip(self.position, finito)]
         return (abs(difference[0]) == 1 and abs(difference[1]) == 0) or (abs(difference[0]) == 0 and abs(difference[1]) == 1) or (abs(difference[0]) == 1 and abs(difference[1]) ==1)
+
+    def is_piece(self)->bool:
+        return True
 
 
 class Queen(Piece):
@@ -43,10 +60,13 @@ class Queen(Piece):
                 "Color must be either white or black"
             )
     def can_move(self,finito:tuple[int,int])->bool:
-        difference = [a - b for a, b in zip(self.position, finito)]
+        difference = [b - a for a, b in zip(self.position, finito)]
 
         return ((difference[0] == 0 and difference[1] != 0) or (difference[1] == 0 and difference[0] != 0)) or (abs(difference[0]) == abs(difference[1]))
 
+
+    def is_piece(self) -> bool:
+        return True
 
 
 class Rook(Piece):
@@ -57,8 +77,15 @@ class Rook(Piece):
                 "Color must be either white or black"
             )
     def can_move(self,finito:tuple[int,int])->bool:
-        difference = [a - b for a, b in zip(self.position, finito)]
+        difference = [b - a for a, b in zip(self.position, finito)]
         return (difference[0] == 0 and  difference[1]!=0) or (difference[1] == 0 and difference[0]!=0)
+
+    def is_piece(self) -> bool:
+        return True
+
+
+
+
 
 
 class Bishop(Piece):
@@ -73,10 +100,12 @@ class Bishop(Piece):
     def can_move(self,finito:tuple[int,int])->bool:
         difference = [a - b for a, b in zip(self.position, finito)]
         if difference[0] == 0 and difference[1] == 0:
-            return
+            return False
         return abs(difference[0]) == abs(difference[1])
         # if the difference (movement vector) in the x and y is in the form of 1,1 2,2 3,3 -3,3 then the bishop can move
 
+    def is_piece(self) -> bool:
+        return True
 
 
 class Knight(Piece):
@@ -90,6 +119,9 @@ class Knight(Piece):
     def can_move(self,finito:tuple[int,int])->bool:
         difference = [a - b for a, b in zip(self.position, finito)]
         return (abs(difference[0])==1 and abs(difference[1])==2) or (abs(difference[0])==2 and abs(difference[1])==1)
+
+    def is_piece(self) -> bool:
+        return True
 
 
 class Pawn(Piece):
@@ -114,3 +146,11 @@ class Pawn(Piece):
                 return difference[0] == -2 or difference[0] == -1
             return difference[0] == -1
         return False
+
+    def is_piece(self) -> bool:
+        return True
+
+
+    def can_attack(self,finito:tuple[int,int]) ->bool:
+        difference = [b - a for a, b in zip(self.position, finito)]
+        return abs(difference[0]) == 1 and abs(difference[1]) == 1 or abs(difference[0]) == 1 and abs(difference[1]) == -1
