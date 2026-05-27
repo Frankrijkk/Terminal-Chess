@@ -121,7 +121,7 @@ def test_legal_pawn_diagonal_left_take():
 
     # LEGAL TAKE: White E4 Pawn captures Black D5 Pawn diagonally
     attacker = board.board[3][4]
-    assert board.take(attacker, (4, 3))
+    assert board.can_take(attacker, (4, 3))
 
 def test_legal_pawn_diagonal_right_take():
     board = Board()
@@ -138,7 +138,7 @@ def test_legal_pawn_diagonal_right_take():
 
     # LEGAL TAKE: White E4 Pawn captures Black D5 Pawn diagonally
     attacker = board.board[3][4]
-    assert board.take(attacker, (4, 5))
+    assert board.can_take(attacker, (4, 5))
 
 
 def test_illegal_pawn_straight_take():
@@ -156,7 +156,7 @@ def test_illegal_pawn_straight_take():
 
     # ILLEGAL TAKE: Pawns cannot take pieces straight ahead
     attacker = board.board[3][4]
-    assert not board.take(attacker, (4, 4))
+    assert not board.can_take(attacker, (4, 4))
 
 # ==========================================
 # KNIGHTS
@@ -202,7 +202,7 @@ def test_legal_knight_take():
 
     # LEGAL TAKE: Knight on F3 jumps to take Pawn on E5
     attacker = board.board[2][5]
-    assert board.take(attacker, (4, 4))
+    assert board.can_take(attacker, (4, 4))
 
 
 def test_illegal_knight_take_friendly_fire():
@@ -210,7 +210,7 @@ def test_illegal_knight_take_friendly_fire():
     board.seed_starting_board()
     # ILLEGAL TAKE: Knight on G1 tries to take friendly White Pawn on E2
     attacker = board.board[0][6]
-    assert not board.take(attacker, (1, 4))
+    assert not board.can_take(attacker, (1, 4))
 
 # ==========================================
 # BISHOPS (No legal moves in starting pos)
@@ -263,14 +263,14 @@ def test_legal_bishop_take():
 
     # LEGAL TAKE: Bishop on C4 takes Black Pawn on F5
     attacker = board.board[3][2]
-    assert board.take(attacker, (4, 1))
+    assert board.can_take(attacker, (4, 1))
 
 def test_illegal_bishop_take_blocked():
     board = Board()
     board.seed_starting_board()
     # ILLEGAL TAKE: Bishop on C1 tries to take Black Pawn on A3, but White B2 pawn is in the way
     attacker = board.board[0][2]
-    assert not board.take(attacker, (2, 0))
+    assert not board.can_take(attacker, (2, 0))
 
 # ==========================================
 # ROOKS (No legal moves in starting pos)
@@ -306,7 +306,7 @@ def test_illegal_rook_diagonal_take():
 
     # ILLEGAL TAKE: Rook on A1 tries to capture diagonally like a Bishop to B2
     attacker = board.board[0][0]
-    assert not board.take(attacker, (1, 1))
+    assert not board.can_take(attacker, (1, 1))
 
 
 def test_legal_rook_take():
@@ -335,7 +335,7 @@ def test_legal_rook_take():
         board.move(r1, (2, 3))
 
     attacker = board.board[2][3]
-    assert board.take(attacker, (4, 3))
+    assert board.can_take(attacker, (4, 3))
 
 
 def test_illegal_rook_teleportation():
@@ -407,7 +407,7 @@ def test_legal_queen_take():
     if board.can_move(p2, (4, 7)):
         board.move(p2, (4, 7))
 
-    assert board.take(attacker, (4, 7))
+    assert board.can_take(attacker, (4, 7))
 
 
 def test_illegal_queen_knight_take():
@@ -415,7 +415,7 @@ def test_illegal_queen_knight_take():
     board.seed_starting_board()
     # ILLEGAL TAKE: Queen on D1 tries to jump in an L-shape to take C3
     attacker = board.board[0][3]
-    assert not board.take(attacker, (2, 2))
+    assert not board.can_take(attacker, (2, 2))
 # ==========================================
 # KINGS (No legal moves in starting pos)
 # ==========================================
