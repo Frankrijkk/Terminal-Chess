@@ -3,7 +3,7 @@ import math
 
 class Piece:
     def __init__(self,position:tuple[int,int],color:str|None=None):
-        if position[0]>7 or position[1]>7 or position[0]<0 or position[1]<0:
+        if position[0]>7 or position[1]>7 or position[0]<-1 or position[1]<-1:
             raise ValueError(
                 "Position must be between 0 and 7"
             )

@@ -1,6 +1,6 @@
 import pytest
 
-from Board import Board
+from Board import Board, CanTakeStatus
 from Pieces import Piece
 
 
@@ -102,6 +102,33 @@ def test_illegal_pawn_backward_move():
     # Moving backwards (E2 to E1)
     assert not board.can_move(board.board[1][4], (0, 4))
 
+def test_un_possoint():
+    board = Board()
+    board.seed_starting_board()
+    # Moving 2 steps forward from starting rank (White E2 to E4)
+    assert board.can_move(board.board[1][4], (3, 4))
+    board.move(board.board[1][4], (3, 4))
+
+    assert board.can_move(board.board[3][4], (4, 4))
+    board.move(board.board[3][4], (4, 4))
+    assert board.can_move(board.board[6][5], (4, 5))
+    board.move(board.board[6][5], (4, 5))
+
+    assert board.can_take(board.board[4][4], (5, 5)) ==CanTakeStatus.EN_PASSANT #the on poissont
+
+def test_un_possoint_too_late():
+    board = Board()
+    board.seed_starting_board()
+    assert board.can_move(board.board[6][5], (4, 5))
+    board.move(board.board[6][5], (4, 5))
+    # Moving 2 steps forward from starting rank (White E2 to E4)
+    assert board.can_move(board.board[1][4], (3, 4))
+    board.move(board.board[1][4], (3, 4))
+
+    assert board.can_move(board.board[3][4], (4, 4))
+    board.move(board.board[3][4], (4, 4))
+
+    assert board.can_take(board.board[4][4], (5, 5)) ==CanTakeStatus.CANNOT_TAKE #the on poissont
 
 # =========================================
 # Takes
@@ -156,7 +183,7 @@ def test_illegal_pawn_straight_take():
 
     # ILLEGAL TAKE: Pawns cannot take pieces straight ahead
     attacker = board.board[3][4]
-    assert not board.can_take(attacker, (4, 4))
+    assert board.can_take(attacker, (4, 4)) == CanTakeStatus.CANNOT_TAKE
 
 # ==========================================
 # KNIGHTS
@@ -210,7 +237,7 @@ def test_illegal_knight_take_friendly_fire():
     board.seed_starting_board()
     # ILLEGAL TAKE: Knight on G1 tries to take friendly White Pawn on E2
     attacker = board.board[0][6]
-    assert not board.can_take(attacker, (1, 4))
+    assert  board.can_take(attacker, (1, 4)) == CanTakeStatus.CANNOT_TAKE
 
 # ==========================================
 # BISHOPS (No legal moves in starting pos)
@@ -270,7 +297,7 @@ def test_illegal_bishop_take_blocked():
     board.seed_starting_board()
     # ILLEGAL TAKE: Bishop on C1 tries to take Black Pawn on A3, but White B2 pawn is in the way
     attacker = board.board[0][2]
-    assert not board.can_take(attacker, (2, 0))
+    assert  board.can_take(attacker, (2, 0)) ==CanTakeStatus.CANNOT_TAKE
 
 # ==========================================
 # ROOKS (No legal moves in starting pos)
@@ -306,7 +333,7 @@ def test_illegal_rook_diagonal_take():
 
     # ILLEGAL TAKE: Rook on A1 tries to capture diagonally like a Bishop to B2
     attacker = board.board[0][0]
-    assert not board.can_take(attacker, (1, 1))
+    assert board.can_take(attacker, (1, 1)) == CanTakeStatus.CANNOT_TAKE
 
 
 def test_legal_rook_take():
@@ -415,7 +442,7 @@ def test_illegal_queen_knight_take():
     board.seed_starting_board()
     # ILLEGAL TAKE: Queen on D1 tries to jump in an L-shape to take C3
     attacker = board.board[0][3]
-    assert not board.can_take(attacker, (2, 2))
+    assert  board.can_take(attacker, (2, 2)) == CanTakeStatus.CANNOT_TAKE
 # ==========================================
 # KINGS (No legal moves in starting pos)
 # ==========================================

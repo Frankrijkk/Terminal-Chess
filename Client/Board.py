@@ -21,12 +21,9 @@ class Board:
 
         self.en_passant_candidates:list[tuple[int,int,str]] = []
 
-        self.knights:list[Knight]=[]
-        self.bishops:list[Bishop]=[]
-        self.queens:list[Queen]=[]
-        self.rooks:list[Rook]=[]
-        self.pawns:list[Pawn]=[]
-        self.kings:list[King]=[]
+        self.white_pieces = []
+        self.black_pieces = []
+
 
     def seed_starting_board(self):
         starting_board:list[list[Piece ]] = [
@@ -45,18 +42,10 @@ class Board:
         self.board = starting_board
         for row in self.board:
             for p in row:
-                if isinstance(p,Pawn):
-                    self.pawns.append(p)
-                if isinstance(p,King):
-                    self.kings.append(p)
-                if isinstance(p,Rook):
-                    self.rooks.append(p)
-                if isinstance(p,Bishop):
-                    self.bishops.append(p)
-                if isinstance(p,Queen):
-                    self.queens.append(p)
-                if isinstance(p,Knight):
-                    self.knights.append(p)
+                if p.color == "white":
+                    self.white_pieces.append(p)
+                elif p.color == "black":
+                    self.black_pieces.append(p)
 
 
 
@@ -75,16 +64,20 @@ class Board:
 
 
     def move(self,piece:Piece,finito:tuple[int,int]):
+        for p in self.en_passant_candidates:
+            if piece.color==p[2]:
+                self.en_passant_candidates.remove(p)
+
 
         if isinstance(piece,Pawn):
             if piece.color == "white" and piece.position[0]==1 and finito[0]==3:
 
-                self.en_passant_candidates.append((piece.position[0]+1,piece.position[1],piece.color))
+                self.en_passant_candidates.append((piece.position[0]+1,piece.position[1],"black"))
             if piece.color == "black" and piece.position[0]==6 and finito[0]==4:
-                self.en_passant_candidates.append((piece.position[0]-1,piece.position[1],piece.color))
-        piece.move(finito)
+                self.en_passant_candidates.append((piece.position[0]-1,piece.position[1],"white"))
         self.board[finito[0]][finito[1]] = piece
         self.board[piece.position[0]][piece.position[1]] = Piece((piece.position[0], piece.position[1]))
+        piece.move(finito)
 
     def can_take(self,attacking_piece:Piece,finito:tuple[int,int])->CanTakeStatus:
         if finito[0]<0 or finito[0]>7 or finito[1]<0 or finito[1]>7:
@@ -94,6 +87,8 @@ class Board:
             for point in way[:-1]:
                 if self.board[point[0]][point[1]].is_piece():
                     return CanTakeStatus.CANNOT_TAKE
+            if (way[-1][0],way[-1][1],attacking_piece.color) in self.en_passant_candidates:
+                return CanTakeStatus.EN_PASSANT
             if not self.board[way[-1][0]][way[-1][1]].is_piece() or self.board[way[-1][0]][way[-1][1]].color == attacking_piece.color:
                 return CanTakeStatus.CANNOT_TAKE
 
@@ -108,16 +103,10 @@ class Board:
                 removed = self.board[finito[0]-1][finito[1]]
             else:
                 removed = self.board[finito[0]+1][finito[1]]
-        if isinstance(removed,Pawn):
-            self.pawns.remove(removed)
-        if isinstance(removed,Queen):
-            self.queens.remove(removed)
-        if isinstance(removed,Rook):
-            self.rooks.remove(removed)
-        if isinstance(removed,Bishop):
-            self.bishops.remove(removed)
-        if isinstance(removed,Knight):
-            self.knights.remove(removed)
+        if removed.color == "white":
+            self.white_pieces.remove(removed)
+        elif removed.color == "black":
+            self.black_pieces.remove(removed)
 
         self.move(attacking_piece,finito)
 
