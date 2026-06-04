@@ -39,9 +39,9 @@ class MoveParser:
         pos_after = self.get_pos(groups["destination"])
 
         if not groups['piece']:
-            piece = Pawn((-1,-1),color)
+            piece = Pawn(pos_after,color)
         else:
-            piece = self.get_piece(groups["piece"],color)
+            piece = self.get_piece(groups["piece"],color,pos_after)
 
         is_attacking = groups["capture"] =="x"
 
@@ -56,7 +56,7 @@ class MoveParser:
         is_mate = groups["check"] =="#"
 
         if groups["promotion"]:
-            promotes_to = self.get_piece(groups["promotion"],color)
+            promotes_to = self.get_piece(groups["promotion"],color,pos_after)
         else:
             promotes_to = None
         self.validate(pos_after,piece,is_attacking,start_pos,is_check,is_mate,promotes_to,color)
@@ -91,18 +91,18 @@ class MoveParser:
 
 
     @staticmethod
-    def get_piece(string, color:str)->Piece:
+    def get_piece(string, color:str,pos_after:tuple[int,int])->Piece:
         match string:
             case "K":
-                return King((-1,-1),color)
+                return King(pos_after,color)
             case "N":
-                return Knight((-1,-1),color)
+                return Knight(pos_after,color)
             case "B":
-                return Bishop((-1,-1),color)
+                return Bishop(pos_after,color)
             case "R":
-                return Rook((-1,-1),color)
+                return Rook(pos_after,color)
             case "Q":
-                return Queen((-1,-1),color)
+                return Queen(pos_after,color)
             case "_":
                 raise InvalidMove("Invalid piece")
         raise InvalidMove("Invalid piece")

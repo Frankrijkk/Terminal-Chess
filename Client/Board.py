@@ -1,4 +1,6 @@
 from enum import Enum
+
+from MoveParser import Move
 from Pieces import *
 from Pieces import Piece
 
@@ -24,6 +26,8 @@ class Board:
         self.white_pieces = []
         self.black_pieces = []
 
+        self.winner:str|None = None
+
 
     def seed_starting_board(self):
         starting_board:list[list[Piece ]] = [
@@ -47,10 +51,74 @@ class Board:
                 elif p.color == "black":
                     self.black_pieces.append(p)
 
+    def is_checkmate(self):
+        return False  #TODO
+    def get_winner(self):
+        return self.winner
+
+    def can_castle(self,color:str,is_king_side)->bool:
+        if is_king_side:
+            return self.check_castle_moves(color,is_king_side) and not self.board[0 if color=="white" else 7 if color=="black" else -1][6].is_piece() and  not self.board[0 if color=="white" else 7 if color=="black" else -1][5].is_piece()
+        else:
+            return self.check_castle_moves(color,is_king_side) and not self.board[0 if color=="white" else 7 if color=="black" else -1][1].is_piece() and  not self.board[0 if color=="white" else 7 if color=="black" else -1][2].is_piece()and  not self.board[0 if color=="white" else 7 if color=="black" else -1][3].is_piece()
 
 
 
+    def castle (self,color:str,is_king_side:bool)->bool:
+        if self.can_castle(color,is_king_side):
+            line = 0 if color=="white" else 7 if color=="black" else -1
+            self.move(self.board[line][4],(line,6 if is_king_side else 2))
+            self.move(self.board[line][7 if is_king_side else 0],(line,5 if is_king_side else 3))
+            return True
+        return False
 
+
+    def make_turn(self,move:Move,color:str):
+        pieces:list[Piece]|None = self.white_pieces if color=="white" else self.black_pieces if color=="black" else None
+        if pieces is None:
+            raise ValueError("invalid Color")
+        start_row = None
+        start_col = None
+        valid_pieces:list[Piece] = []
+        is_attack_en_poissont = False
+        if move.start_pos is not None:
+            start_row = move.start_pos[0] if move.start_pos[0]>=0 else None
+            start_col = move.start_pos[1] if move.start_pos[1]>=0 else None
+        if move.is_check or move.is_mate:
+            if not move.piece.can_attack(tuple([k for k in pieces if isinstance(k,King)][0].position)):
+                return False
+
+
+        for p in pieces:
+            if not isinstance(p,type(move.piece)):
+                continue
+            if start_row is not None and p.position[0] !=start_row:
+                continue
+            if start_col is not None and p.position[1] !=start_col:
+                continue
+            if move.is_attacking:
+                attack_status = self.can_take(p,move.finito)
+                if attack_status == CanTakeStatus.CANNOT_TAKE:
+                    continue
+                elif attack_status == CanTakeStatus.EN_PASSANT or attack_status == CanTakeStatus.CAN_TAKE:
+                    is_attack_en_poissont = True
+                    valid_pieces.append(p)
+            else:
+                if not self.can_move(p,move.finito):
+                    continue
+                else :
+                    valid_pieces.append(p)
+        if len(valid_pieces) !=1:
+            return False
+
+        if move.is_attacking:
+            self.take(valid_pieces[0],move.finito,is_attack_en_poissont)
+        else:
+            self.move(valid_pieces[0],move.finito)
+        if move.promotes_to is not None:
+            pieces[pieces.index(valid_pieces[0])] = move.promotes_to
+            self.board[move.finito[0]][move.finito[1]] = move.promotes_to
+        return True
 
     def can_move(self,piece:Piece,finito:tuple[int,int])->bool:
         if finito[0]<0 or finito[0]>7 or finito[1]<0 or finito[1]>7:
@@ -101,13 +169,57 @@ class Board:
         else:
             if attacking_piece.color == "white":
                 removed = self.board[finito[0]-1][finito[1]]
+                self.board[finito[0]-1][finito[1]] = Piece((finito[0]-1,finito[1]))
             else:
                 removed = self.board[finito[0]+1][finito[1]]
+                self.board[finito[0] - 1][finito[1]] = Piece((finito[0] - 1, finito[1]))
         if removed.color == "white":
             self.white_pieces.remove(removed)
         elif removed.color == "black":
             self.black_pieces.remove(removed)
 
         self.move(attacking_piece,finito)
+
+    def check_castle_moves(self,color:str,is_king_side:bool)->bool:
+        rookmoved: bool = True
+        toiterate=[]
+        if color == "white":
+            toiterate = self.white_pieces
+        elif color=="black":
+            toiterate = self.black_pieces
+
+        for rk in [p for p in toiterate if (isinstance(p,King) or isinstance(p,Rook)) ]:
+
+            if isinstance(rk,King):
+                if rk.has_moved:
+                    return False
+            elif isinstance(rk,Rook):
+                if rk.position ==[0,7 if is_king_side else 0]:
+                    if rk.has_moved:
+                        rookmoved = True
+                    else:
+                        rookmoved = False
+        return rookmoved
+
+    def get_board_string(self,color):
+        result: str = ""
+        if color == "black":
+            for i in range(0,8):
+                result += str(i+1) + " "
+                for p in self.board[i]:
+                    result += str(p) + " "
+                result += "\n"
+        elif color == "white":
+            for i in range(7,-1,-1):
+                result += str(i+1) + " "
+                for p in self.board[i]:
+                    result += str(p) + " "
+                result += "\n"
+        result +="  A B C D E F G H"
+
+        return result
+
+
+
 
 

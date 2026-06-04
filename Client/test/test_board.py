@@ -1,7 +1,7 @@
 import pytest
 
 from Board import Board, CanTakeStatus
-from Pieces import Piece
+from Pieces import Piece, Pawn
 
 
 def test_create_board():
@@ -115,6 +115,9 @@ def test_un_possoint():
     board.move(board.board[6][5], (4, 5))
 
     assert board.can_take(board.board[4][4], (5, 5)) ==CanTakeStatus.EN_PASSANT #the on poissont
+    board.take(board.board[4][4], (5, 5),True)
+
+    assert not isinstance(board.board[4][5],Pawn)
 
 def test_un_possoint_too_late():
     board = Board()

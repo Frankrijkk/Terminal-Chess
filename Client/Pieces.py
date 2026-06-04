@@ -10,7 +10,11 @@ class Piece:
 
         self.color:str|None = color
         self.position:list = list(position)
+        self.has_moved:bool = False
 
+
+    def __str__(self):
+        return "_"
 
     def can_move(self,finito:tuple[int,int])->bool:
         print("Can't move a nothing")
@@ -22,7 +26,9 @@ class Piece:
 
 
     def move(self,finito:tuple[int,int]):
-            self.position = list(finito)
+        self.position = list(finito)
+        self.has_moved = True
+
 
     def on_the_way(self,finito:tuple[int,int])->list[tuple[int,int]]:
         difference = [b - a for a, b in zip(self.position, finito)]
@@ -51,6 +57,8 @@ class King(Piece):
     def is_piece(self)->bool:
         return True
 
+    def __str__(self):
+        return "K"
 
 class Queen(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
@@ -67,7 +75,8 @@ class Queen(Piece):
 
     def is_piece(self) -> bool:
         return True
-
+    def __str__(self):
+        return "Q"
 
 class Rook(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
@@ -83,6 +92,9 @@ class Rook(Piece):
     def is_piece(self) -> bool:
         return True
 
+
+    def __str__(self):
+        return "R"
 
 
 
@@ -107,6 +119,9 @@ class Bishop(Piece):
     def is_piece(self) -> bool:
         return True
 
+    def __str__(self):
+        return "B"
+
 
 class Knight(Piece):
     def __init__(self,position:tuple[int,int],color:str|None=None):
@@ -123,6 +138,9 @@ class Knight(Piece):
     def is_piece(self) -> bool:
         return True
 
+
+    def __str__(self):
+        return "N"
 
 class Pawn(Piece):
 
@@ -154,3 +172,7 @@ class Pawn(Piece):
     def can_attack(self,finito:tuple[int,int]) ->bool:
         difference = [b - a for a, b in zip(self.position, finito)]
         return abs(difference[0]) == 1 and abs(difference[1]) == 1 or abs(difference[0]) == 1 and abs(difference[1]) == -1
+
+    def __str__(self):
+        return "P"
+
