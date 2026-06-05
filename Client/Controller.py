@@ -69,8 +69,12 @@ class Controller:
                 print("K - King")
                 print("  - Pawn(no letter)")
                 print("destination: a1-h8")
+                print("to castle, use O-O or O-O-O for king side and queen side respectively")
                 print("If you want to capture a piece, add an x before the destination")
                 print("When promoting add a +{piece} after the destination")
+                print("Don't bother with check notation, just play the moves")
+                print("To win - you have to take the opponent's king, not only checkmate it")
+                print("Examples: Nf3 - knight to f3, Nxf3 - knight to e3, Nxe4 - knight to e4, d8=Q - pawn to d8 promoting to queen")
             case ["help"]:
                 print("Commands:")
                 print(":quit - Quit the game")

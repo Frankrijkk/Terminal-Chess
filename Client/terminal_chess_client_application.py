@@ -50,7 +50,7 @@ class TerminalChessClientApplication:
     def run(self):
         while True:
             print("Welcome to the terminal chess client application")
-            inp = input("What would you like to do?\n1.start a new local game\n2.Continue a game\n3.play with a bot\n4.join a server game\n0.exit\n>")
+            inp = input("What would you like to do?\n1.start a new local game\n2.Continue a game\n3.play with a bot(To be implemented)\n4.join a server game(to be implemented)\n0.exit\n>")
             match inp:
                 case "1":
                     self.handle_local_game()
