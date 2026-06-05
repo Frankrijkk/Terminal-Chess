@@ -21,7 +21,7 @@ class Board:
         self.is_black_castle_king_side_available = True
         self.is_black_castle_queen_side_available = True
 
-        self.en_passant_candidates:list[tuple[int,int,str]] = []
+        self.en_passant_candidates:set[tuple[int,int,str]] = set()
 
         self.white_pieces = []
         self.black_pieces = []
@@ -159,15 +159,16 @@ class Board:
     def move(self,piece:Piece,finito:tuple[int,int]):
         for p in self.en_passant_candidates:
             if piece.color==p[2]:
-                self.en_passant_candidates.remove(p)
+                self.en_passant_candidates.discard(p)
+                break
 
 
         if isinstance(piece,Pawn):
             if piece.color == "white" and piece.position[0]==1 and finito[0]==3:
 
-                self.en_passant_candidates.append((piece.position[0]+1,piece.position[1],"black"))
+                self.en_passant_candidates.add((piece.position[0]+1,piece.position[1],"black"))
             if piece.color == "black" and piece.position[0]==6 and finito[0]==4:
-                self.en_passant_candidates.append((piece.position[0]-1,piece.position[1],"white"))
+                self.en_passant_candidates.add((piece.position[0]-1,piece.position[1],"white"))
         self.board[finito[0]][finito[1]] = piece
         self.board[piece.position[0]][piece.position[1]] = Piece((piece.position[0], piece.position[1]))
         piece.move(finito)
