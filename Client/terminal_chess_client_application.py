@@ -1,42 +1,103 @@
+import functools
+import pickle
 
 from Board import Board
-from Controller import Controller
+from Controller import Controller, ForfeitException
 from MoveParser import MoveParser
+from logger import Logger
 
 
 class TerminalChessClientApplication:
     def __init__(self):
-        self.target = None
-
-
+        print()
 
     def handle_local_game(self):
         board = Board()
         board.seed_starting_board()
         moveparser = MoveParser()
-        whiteController = Controller (moveparser,board,"white")
-        blackController = Controller (moveparser,board,"black")
-        self.alternate_controllers(whiteController,blackController,board)
-        while not board.is_checkmate():
-            whiteController.get_move()
-            blackController.get_move()
+        logger = Logger()
+        whitecontroller = Controller (moveparser,board,"white",logger)
+        blackcontroller = Controller (moveparser,board,"black",logger)
+        while True:
+            try:
+                whitecontroller.get_move()
+                if board.is_checkmate():
+                    break
+                blackcontroller.get_move()
+                if board.is_checkmate():
+                    break
+            except ForfeitException as e:
+                print("Game forfeited")
+                if e.message == "white":
+                    blackcontroller.victory()
+                else:
+                    whitecontroller.victory()
+                return
         board.get_winner()
+        if board.get_winner() == "white":
+            whitecontroller.victory()
+        else:
+            blackcontroller.victory()
 
 
-    def alternate_controllers(self, controller1:Controller, controller2:Controller, board):
-        while not board.is_checkmate() :
-            yield controller1.get_move()
-            yield controller2.get_move()
-        yield board.get_winner()
+    def handle_bot_game(self):
+        pass
+
+    def handle_online_game(self):
+        pass
+
 
     def run(self):
         while True:
             print("Welcome to the terminal chess client application")
-            inp = input("What would you like to do?\n1.start a new local game\n2.play with a bot\n3.join a server game\n0.exit\n>")
+            inp = input("What would you like to do?\n1.start a new local game\n2.Continue a game\n3.play with a bot\n4.join a server game\n0.exit\n>")
             match inp:
                 case "1":
-                    target = "local"
                     self.handle_local_game()
+                case "2":
+                    self.load_game()
+                case "3":
+                    self.handle_bot_game()
+                case "4":
+                    self.handle_online_game()
+                case "0":
+                    return
+
+    def load_game(self):
+        inp = input("Enter your game's filename: ")
+        try:
+            with open(inp,"rb") as f:
+                game_state = pickle.load(f)
+                board = game_state["board"]
+                logger = game_state["logger"]
+                color = game_state["current_turn"]
+            whitecontroller = Controller (MoveParser(),board,"white",logger)
+            blackcontroller = Controller (MoveParser(),board,"black",logger)
+            if color == "black":
+                blackcontroller.get_move()
+        except FileNotFoundError:
+            print("File not found")
+            return
+        while True:
+            try:
+                whitecontroller.get_move()
+                if board.is_checkmate():
+                    break
+                blackcontroller.get_move()
+                if board.is_checkmate():
+                    break
+            except ForfeitException as e:
+                print("Game forfeited")
+                if e.message == "white":
+                    blackcontroller.victory()
+                else:
+                    whitecontroller.victory()
+                return
+        board.get_winner()
+        if board.get_winner() == "white":
+            whitecontroller.victory()
+        else:
+            blackcontroller.victory()
 
 
 if __name__ == "__main__":

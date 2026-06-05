@@ -1,6 +1,6 @@
 
 
-from Pieces import Piece, King, Knight, Bishop, Rook, Queen, Pawn
+from models.Pieces import Piece, King, Knight, Bishop, Rook, Queen, Pawn
 
 import re
 

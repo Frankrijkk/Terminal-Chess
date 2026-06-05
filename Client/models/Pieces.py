@@ -14,7 +14,7 @@ class Piece:
 
 
     def __str__(self):
-        return "_"
+        return "."
 
     def can_move(self,finito:tuple[int,int])->bool:
         print("Can't move a nothing")
@@ -30,15 +30,14 @@ class Piece:
         self.has_moved = True
 
 
-    def on_the_way(self,finito:tuple[int,int])->list[tuple[int,int]]:
+    def on_the_way(self,finito:tuple[int,int]):
         difference = [b - a for a, b in zip(self.position, finito)]
-        result = []
         N = math.gcd(abs(difference[0]),abs(difference[1]))
         dy = difference[0]//N
         dx = difference[1]//N
         for i in range(1,N+1):
-            result.append((self.position[0]+i*dy,self.position[1]+i*dx))
-        return result
+            yield self.position[0]+i*dy,self.position[1]+i*dx
+
 
     def is_piece(self)->bool:
         return False

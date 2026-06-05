@@ -1,7 +1,5 @@
-import pytest
-
 from Board import Board, CanTakeStatus
-from Pieces import Piece, Pawn
+from models.Pieces import Piece, Pawn
 
 
 def test_create_board():

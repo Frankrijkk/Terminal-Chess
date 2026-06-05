@@ -1,5 +1,4 @@
-import pytest
-from Pieces import Pawn, Bishop, Knight, Queen, King, Rook
+from models.Pieces import Pawn, Bishop, Knight, Queen, King, Rook
 
 
 def test_pawn_can_move():

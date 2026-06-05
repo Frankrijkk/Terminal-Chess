@@ -1,7 +1,5 @@
-import pytest
-
 from MoveParser import MoveParser, Move, InvalidMove, Castle
-from Pieces import Pawn, Queen, Knight, Rook, Bishop
+from models.Pieces import Pawn, Queen, Knight, Rook, Bishop
 
 
 def test_normal_double_pawn_move():

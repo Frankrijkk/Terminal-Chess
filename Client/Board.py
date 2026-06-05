@@ -1,8 +1,8 @@
 from enum import Enum
 
 from MoveParser import Move
-from Pieces import *
-from Pieces import Piece
+from models.Pieces import *
+from models.Pieces import Piece
 
 
 class CanTakeStatus(Enum):
@@ -28,6 +28,8 @@ class Board:
 
         self.winner:str|None = None
 
+        self.back_rank = lambda color: 0 if color == "white" else 7 if color == "black" else -1
+
 
     def seed_starting_board(self):
         starting_board:list[list[Piece ]] = [
@@ -52,15 +54,33 @@ class Board:
                     self.black_pieces.append(p)
 
     def is_checkmate(self):
-        return False  #TODO
+        king:King|None = None
+        for p in self.white_pieces:
+            if isinstance(p,King):
+                king = p
+                break
+        if king is None:
+            self.winner = "black"
+            return True
+        king = None
+        for p in self.black_pieces:
+            if isinstance(p,King):
+                king = p
+                break
+        if king is None:
+            self.winner = "white"
+            return True
+
+        return False
     def get_winner(self):
         return self.winner
 
     def can_castle(self,color:str,is_king_side)->bool:
+        line = self.back_rank(color)
         if is_king_side:
-            return self.check_castle_moves(color,is_king_side) and not self.board[0 if color=="white" else 7 if color=="black" else -1][6].is_piece() and  not self.board[0 if color=="white" else 7 if color=="black" else -1][5].is_piece()
+            return self.check_castle_moves(color,is_king_side) and not self.board[line][6].is_piece() and  not self.board[line][5].is_piece()
         else:
-            return self.check_castle_moves(color,is_king_side) and not self.board[0 if color=="white" else 7 if color=="black" else -1][1].is_piece() and  not self.board[0 if color=="white" else 7 if color=="black" else -1][2].is_piece()and  not self.board[0 if color=="white" else 7 if color=="black" else -1][3].is_piece()
+            return self.check_castle_moves(color,is_king_side) and not self.board[line][1].is_piece() and  not self.board[line][2].is_piece()and  not self.board[line][3].is_piece()
 
 
 
@@ -100,8 +120,10 @@ class Board:
                 attack_status = self.can_take(p,move.finito)
                 if attack_status == CanTakeStatus.CANNOT_TAKE:
                     continue
-                elif attack_status == CanTakeStatus.EN_PASSANT or attack_status == CanTakeStatus.CAN_TAKE:
+                elif attack_status == CanTakeStatus.EN_PASSANT:
                     is_attack_en_poissont = True
+                    valid_pieces.append(p)
+                elif attack_status == CanTakeStatus.CAN_TAKE:
                     valid_pieces.append(p)
             else:
                 if not self.can_move(p,move.finito):
@@ -121,6 +143,9 @@ class Board:
         return True
 
     def can_move(self,piece:Piece,finito:tuple[int,int])->bool:
+        # if isinstance(piece,King):
+        #     if not finito in self.check_king_moves(piece):
+        #         return False
         if finito[0]<0 or finito[0]>7 or finito[1]<0 or finito[1]>7:
             return False
         if piece.can_move(finito):
@@ -151,7 +176,7 @@ class Board:
         if finito[0]<0 or finito[0]>7 or finito[1]<0 or finito[1]>7:
             return CanTakeStatus.CANNOT_TAKE
         if attacking_piece.can_attack(finito):
-            way = attacking_piece.on_the_way(finito)
+            way = list(attacking_piece.on_the_way(finito))
             for point in way[:-1]:
                 if self.board[point[0]][point[1]].is_piece():
                     return CanTakeStatus.CANNOT_TAKE
@@ -195,29 +220,63 @@ class Board:
                     return False
             elif isinstance(rk,Rook):
                 if rk.position ==[0,7 if is_king_side else 0]:
-                    if rk.has_moved:
+                    if not rk.has_moved:
                         rookmoved = True
                     else:
                         rookmoved = False
         return rookmoved
 
     def get_board_string(self,color):
-        result: str = ""
-        if color == "black":
-            for i in range(0,8):
-                result += str(i+1) + " "
-                for p in self.board[i]:
-                    result += str(p) + " "
-                result += "\n"
-        elif color == "white":
-            for i in range(7,-1,-1):
-                result += str(i+1) + " "
-                for p in self.board[i]:
-                    result += str(p) + " "
-                result += "\n"
-        result +="  A B C D E F G H"
+        # ANSI Color Codes
+        BG_LIGHT = "\033[47m"  # White/Light Gray background
+        BG_DARK = "\033[100m"  # Dark Gray background
+        TEXT_BLACK = "\033[30m"  # Forces piece color to be visible
+        RESET = "\033[0m"  # Resets formatting to terminal default
+
+        pieces = {
+            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',
+            '.': ' '
+        }
+
+        result = "\n   a b c d  e f g h\n  +================+\n"
+        if color=="white":
+            for rank_idx in range(7,-1,-1):
+                rank_label = rank_idx+1
+                result+=(str(rank_label)+" |")
+                for file_idx in range(8):
+                    piece = self.board[rank_idx][file_idx]
+                    piece_char = str(piece).upper() if piece.color == "white" else str(piece).lower() if piece.color=="black"else "."
+                    symbol = pieces.get(piece_char, " ")
+                    if (rank_idx + file_idx) % 2 == 0:
+                        bg_color = BG_LIGHT
+                    else:
+                        bg_color = BG_DARK
+                    result += f"{bg_color}{TEXT_BLACK}{symbol} {RESET}"
+                result +=f"| {rank_label}\n"
+            result+= "  +================+\n   a b c d  e f g h\n"
+        elif color=="black":
+            for rank_idx in range(0,8):
+                rank_label = rank_idx+1
+                result+=(str(rank_label)+" |")
+                for file_idx in range(8):
+                    piece = self.board[rank_idx][file_idx]
+                    piece_char = str(piece).upper() if piece.color == "white" else str(piece).lower() if piece.color=="black"else "."
+                    symbol = pieces.get(piece_char, " ")
+                    if (rank_idx + file_idx) % 2 == 0:
+                        bg_color = BG_LIGHT
+                    else:
+                        bg_color = BG_DARK
+                    result += f"{bg_color}{TEXT_BLACK}{symbol} {RESET}"
+                result +=f"| {rank_label}\n"
+            result+= "  +================+\n   a b c d  e f g h\n"
 
         return result
+
+
+
+
+
 
 
 
