@@ -28,7 +28,8 @@ class Board:
 
         self.winner:str|None = None
 
-        self.back_rank = lambda color: 0 if color == "white" else 7 if color == "black" else -1
+    def back_rank(self,color:str):
+        return  0 if color == "white" else 7 if color == "black" else -1
 
 
     def seed_starting_board(self):

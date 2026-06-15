@@ -1,7 +1,7 @@
 import datetime
 import pickle
 
-import logger
+
 from Board import Board
 from MoveParser import MoveParser, Move, InvalidMove, Castle
 from logger import log_move, Logger
@@ -90,7 +90,7 @@ class Controller:
             print(self.board.get_board_string(self.color))
             inp = input(f"{self.color.upper()}'s turn: ")
             if self.proccess_input(inp):
-                break
+                return inp
 
     def victory(self):
         print(f"{self.color.upper()} wins! Congratulations!")
