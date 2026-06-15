@@ -61,29 +61,24 @@ class Game:
         await self.manager.send_personal_message("START", white)
         await self.manager.send_personal_message("START", black)
         while True:
-            print("turn")
+
             moved: bool = False
             while not moved:
-                print("waiting for move")
                 try:
                     movestr = (await self.manager.inboxes[white].get()).strip()
-                    print(movestr)
                     if movestr == "disconnect":
                         await self.manager.send_personal_message("ff white", black)
                         return
                     if white_controller.proccess_input(movestr):
                         moved = True
-                        print("moved")
                         if self.board.is_checkmate():
                             await self.manager.send_personal_message("CHECKMATE "+ self.board.get_winner(), black)
                             await self.manager.send_personal_message("CHECKMATE "+ self.board.get_winner(), white)
                             return
 
-                        print("correct")
                         await self.manager.send_personal_message("CORRECT", white)
                         await self.manager.send_personal_message(movestr,black)
-                    else:
-                        print("not moved")
+
 
                 except queue.Empty:
                     continue
